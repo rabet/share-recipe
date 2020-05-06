@@ -1,0 +1,26 @@
+<html>
+<head>
+    <link rel="stylesheet" href="static/style.css">
+  <title>Přidej svůj oblíbený recepis :)</title>
+</head>
+<body>
+  <div id="center-content">
+    <div class="login-container">
+      <h3>Přidej svůj oblíbený recepis :)</h3>
+      <div class="login-form">
+        <form method="POST" action="/add-recipe">
+          <input type="text" name="title" placeholder="Název" />
+          <textarea type="text" name="desc" placeholder="Poznámky, tipy" rows="4" cols="50"></textarea>
+          <input type="text" name="link" placeholder="Odkaz na recept" />
+          <select>
+            <option value="1">Hlavní</option>
+            <option value="2">Deserty</option>
+            <option value="3">Polévky</option>
+          </select>
+          <button type="submit" name="_">Přidej</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

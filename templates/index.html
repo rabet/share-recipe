@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="apple-touch-icon" href="icon.png" />
+    <!-- Place favicon.ico in the root directory -->
+    <link rel="stylesheet" href="static/style.css" />
+
+    <meta name="theme-color" content="#fafafa" />
+  </head>
+
+  <body>
+    <div class="applicationHome">
+      <section id="packages">
+        <div class="section-heading center">
+          <h2 class="section-title">Recepty - odkazy</h2>
+          <a href="/recipes/moje" class="more">Jen moje</a>
+        </div>
+        {{ if .Recipes }}
+        <ol class="grid fixed-height">
+          {{range .Recipes }}
+          <li class="module">
+            <span class="metadata">
+              <a href="{{.Link}}" class="click-intercept"></a>
+              <span class="title">
+                {{.Title}}
+                <span class="colon">:</span>
+                {{.Category}}
+              </span>
+              <p class="description">{{.Descr}}</p>
+              <div class="stats">
+                <strong>{{.Category}}</strong> | {{.Author.Username}}
+              </div>
+            </span>
+          </li>
+          {{end}}
+        </ol>
+        {{else}}
+      </section>
+      <div class="note">
+        <p class="noteHeading">No Recipes here</p>
+        <p class="notefooter">
+          Create new task<button class="floating-action-icon-add">here</button>
+        </p>
+      </div>
+      {{end}}
+    </div>
+    <script src="js/main.js"></script>
+  </body>
+</html>
