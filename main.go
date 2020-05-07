@@ -3,17 +3,24 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v4"
 	"github.com/spf13/viper"
 )
 
-var conn *pgx.Conn
-var tpl *template.Template
+const SessionName = "share-recipe-cookie"
+
+var (
+	conn         *pgx.Conn
+	tpl          *template.Template
+	sessionStore *sessions.CookieStore
+)
 
 func init() {
 	viper.AddConfigPath(".")
@@ -27,6 +34,18 @@ func init() {
 	dbConn(dburl)
 
 	tpl = template.Must(template.ParseGlob("templates/*.html"))
+
+	gob.Register(User{})
+	sessionStore = sessions.NewCookieStore(
+		[]byte(viper.GetString("SESSION_AUTHENTICATION_KEY")),
+		[]byte(viper.GetString("SESSION_ENCRYPTION_KEY")),
+	)
+
+	sessionStore.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   60 * 60 * 24 * 7,
+		HttpOnly: true,
+	}
 }
 
 func main() {
@@ -51,4 +70,16 @@ func dbConn(dbUrl string) {
 // returns a handle to the DB object
 func GetDB() *pgx.Conn {
 	return conn
+}
+
+// getUser returns a user from session s
+// on error returns an empty user
+func getUser(s *sessions.Session) User {
+	val := s.Values["user"]
+	var user = User{}
+	user, ok := val.(User)
+	if !ok {
+		return User{Authenticated: false}
+	}
+	return user
 }

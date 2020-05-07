@@ -19,7 +19,8 @@
       <section id="packages">
         <div class="section-heading center">
           <h2 class="section-title">Recepty - odkazy</h2>
-          <a href="/recipes/moje" class="more">Jen moje</a>
+          <a href="/recipes/moje" class="more">Jen moje</a> / 
+          <a href="/add-recipe" class="more">Přidat</a>
         </div>
         {{ if .Recipes }}
         <ol class="grid fixed-height">
@@ -30,7 +31,6 @@
               <span class="title">
                 {{.Title}}
                 <span class="colon">:</span>
-                {{.Category}}
               </span>
               <p class="description">{{.Descr}}</p>
               <div class="stats">

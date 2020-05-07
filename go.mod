@@ -3,6 +3,7 @@ module rebobi
 go 1.14
 
 require (
+	github.com/gorilla/sessions v1.2.0
 	github.com/huandu/xstrings v1.3.1 // indirect
 	github.com/jackc/pgx/v4 v4.6.0
 	github.com/jackc/tern v1.11.0 // indirect

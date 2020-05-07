@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+const (
+	Login_route = "/login"
+)
+
 // PlayerStore stores score information about players
 type PlayerStore interface {
 	GetRecipeScore(name string) int
@@ -13,6 +17,7 @@ type PlayerStore interface {
 	FetchRecipes() error
 	GetRecipes() ([]Recipe, error)
 	AddRecipe(userId, categoryId int, title, desc, link string) error
+	FetchUserByCode(code int) (*User, error)
 }
 
 // PlayerServer is a HTTP interface for player information
@@ -32,6 +37,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	router := http.NewServeMux()
 	router.Handle("/recipes", http.HandlerFunc(p.recipesHandler))
 	router.Handle("/add-recipe", http.HandlerFunc(p.addRecipeHandler))
+	router.Handle(Login_route, http.HandlerFunc(p.loginHandler))
 	// router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -59,6 +65,27 @@ func (p *PlayerServer) addRecipeHandler(w http.ResponseWriter, r *http.Request) 
 	// w.Header().Set("content-type", jsonContentType)
 	// json.NewEncoder(w).Encode(p.store.GetRecipes())
 
+	// cookies
+	session, err := sessionStore.Get(r, SessionName)
+	if err != nil {
+		fmt.Printf("Get session error: %v", err)
+		//handleServerError(w, err)
+		return
+	}
+	user := getUser(session)
+
+	/* if auth := user.Authenticated; !auth {
+		session.AddFlash("You don't have access!")
+		err = session.Save(r, w)
+		if err != nil {
+			fmt.Printf("Auth error: %v", err)
+			//handleServerError(w, err)
+			return
+		}
+		//http.Redirect(w, r, Login_route, http.StatusFound)
+		return
+	} */
+
 	switch r.Method {
 	case http.MethodPost:
 		title := r.FormValue("title")
@@ -66,18 +93,55 @@ func (p *PlayerServer) addRecipeHandler(w http.ResponseWriter, r *http.Request) 
 		link := r.FormValue("link")
 		categoryId, _ := strconv.Atoi(r.FormValue("categoryId"))
 
-		if (title == "") || (link == "") || categoryId == 0 {
+		if link == "" || title == "" {
 			fmt.Fprint(w, "Zadej nazev, odkaz a kategorii")
 		} else {
-			err := p.store.AddRecipe(1, categoryId, title, desc, link)
+			err := p.store.AddRecipe(user.Id, categoryId, title, desc, link)
 			if err != nil {
 				handleServerError(w, err)
 			}
-			fmt.Fprint(w, "Recept pridan, mnamy mnamyy ;)")
+			http.Redirect(w, r, "/recipes", http.StatusCreated)
 		}
 	case http.MethodGet:
-		tpl.ExecuteTemplate(w, "add-recipe.html", nil)
+		tpl.ExecuteTemplate(w, "add-recipe.html", user)
 	}
+}
+func (p *PlayerServer) loginHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := sessionStore.Get(r, SessionName)
+	if err != nil {
+		fmt.Printf("Login error: %v", err)
+		handleServerError(w, err)
+		return
+	}
+
+	code, _ := strconv.Atoi(r.FormValue("code"))
+
+	user, err := p.store.FetchUserByCode(code)
+	if err != nil {
+		handleServerError(w, err)
+		return
+	}
+
+	if code != user.Code {
+		err = session.Save(r, w)
+		if err != nil {
+			handleServerError(w, err)
+			return
+		}
+		fmt.Fprint(w, "Kod není správný :(")
+		return
+	}
+
+	user.Authenticated = true
+
+	session.Values["user"] = user
+
+	err = session.Save(r, w)
+	if err != nil {
+		handleServerError(w, err)
+		return
+	}
+	http.Redirect(w, r, "/add-recipe", http.StatusFound)
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,5 +172,5 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 
 func handleServerError(w http.ResponseWriter, err error) {
 	// log.WithField("err", err).Info("Error handling session.")
-	http.Error(w, "Application Error", http.StatusInternalServerError)
+	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

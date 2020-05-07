@@ -6,17 +6,33 @@
 <body>
   <div id="center-content">
     <div class="login-container">
+        {{ if not .Authenticated }}
+        <p>Zadej prosim kód, který ti měl poslat Hledí na měsíc :-)</p>
+        <form action="/login" method="POST">
+            <input type="password" name="code" placeholder="secret code" required>
+            <input type="submit" value="Submit">
+        </form>
+        {{ end }}
       <h3>Přidej svůj oblíbený recepis :)</h3>
+      <h4>{{.Username}}</h4>
       <div class="login-form">
         <form method="POST" action="/add-recipe">
-          <input type="text" name="title" placeholder="Název" />
-          <textarea type="text" name="desc" placeholder="Poznámky, tipy" rows="4" cols="50"></textarea>
-          <input type="text" name="link" placeholder="Odkaz na recept" />
-          <select>
-            <option value="1">Hlavní</option>
-            <option value="2">Deserty</option>
-            <option value="3">Polévky</option>
-          </select>
+          <div>
+          	<input type="text" name="title" placeholder="Název" />
+          </div>
+          <div>
+            <textarea type="text" name="desc" placeholder="Poznámky, tipy" rows="4" cols="50"></textarea>
+          </div>
+          <div>
+            <input type="text" name="link" placeholder="Odkaz na recept" />
+          </div>
+          <div>
+            <select name="categoryId">
+              <option value="1">Hlavní</option>
+              <option value="2">Deserty</option>
+              <option value="3">Polévky</option>
+            </select>
+          </div>
           <button type="submit" name="_">Přidej</button>
         </form>
       </div>

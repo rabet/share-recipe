@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"sync"
+
+	"github.com/jackc/pgx/v4"
 )
 
 // NewRecipeStore initialises an empty Recipe store
@@ -23,7 +25,10 @@ type Recipe struct {
 }
 
 type User struct {
-	Username string
+	Id            int
+	Username      string
+	Code          int
+	Authenticated bool
 }
 
 // RecipeStore collects data about Recipes in memory
@@ -33,7 +38,7 @@ type RecipeStore struct {
 	lock sync.RWMutex
 }
 
-// GetLeague returns a collection of Recipes
+// GetRecipes returns a collection of Recipes
 func (i *RecipeStore) GetRecipes() ([]Recipe, error) {
 	if len(i.store) <= 0 {
 		err := i.FetchRecipes()
@@ -45,7 +50,7 @@ func (i *RecipeStore) GetRecipes() ([]Recipe, error) {
 	return i.store, nil
 }
 
-// GetLeague returns a collection of Recipes
+// FetchRecipes fetches a collection of Recipes
 func (i *RecipeStore) FetchRecipes() error {
 	i.store = nil
 	rows, err := conn.Query(context.Background(), "SELECT recipe.title, recipe.descr, recipe.link, people.username, category.title FROM recipe INNER JOIN people ON recipe.people_id = people.id INNER JOIN category ON recipe.category_id = category.id")
@@ -75,6 +80,20 @@ func (i *RecipeStore) AddRecipe(userId, categoryId int, title, desc, link string
 	}
 	i.store = nil
 	return nil
+}
+
+// GetLeague returns a collection of Recipes
+func (i *RecipeStore) FetchUserByCode(code int) (*User, error) {
+	var u User
+	err := conn.QueryRow(context.Background(), "SELECT id, username, code FROM people WHERE code = $1", code).Scan(&u.Id, &u.Username, &u.Code)
+	switch err {
+	case nil:
+		return &u, nil
+	case pgx.ErrNoRows:
+		return &u, nil
+	default:
+		return nil, err
+	}
 }
 
 // RecordWin will record a Recipe's win
