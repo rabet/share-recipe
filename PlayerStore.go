@@ -27,8 +27,13 @@ type Recipe struct {
 type User struct {
 	Id            int
 	Username      string
-	Code          int
 	Authenticated bool
+}
+
+type FetchErr string
+
+func (e FetchErr) Error() string {
+	return string(e)
 }
 
 // RecipeStore collects data about Recipes in memory
@@ -85,16 +90,21 @@ func (i *RecipeStore) AddRecipe(userId, categoryId int, title, desc, link string
 // GetLeague returns a collection of Recipes
 func (i *RecipeStore) FetchUserByCode(code int) (*User, error) {
 	var u User
-	err := conn.QueryRow(context.Background(), "SELECT id, username, code FROM people WHERE code = $1", code).Scan(&u.Id, &u.Username, &u.Code)
+	err := conn.QueryRow(context.Background(), "SELECT id, username FROM people WHERE code = $1", code).Scan(&u.Id, &u.Username)
 	switch err {
 	case nil:
 		return &u, nil
 	case pgx.ErrNoRows:
-		return &u, nil
+		return nil, ErrNotFound
 	default:
 		return nil, err
 	}
 }
+
+// Gets user code
+// func (u *User) GetCode() int {
+// 	return u.code
+// }
 
 // RecordWin will record a Recipe's win
 func (i *RecipeStore) RecordWin(name string) {

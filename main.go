@@ -54,7 +54,7 @@ func main() {
 	server := NewPlayerServer(NewRecipeStore())
 
 	if err := http.ListenAndServe(":"+port, server); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
+		log.Fatalf("could not listen on port %s %v", port, err)
 	}
 }
 

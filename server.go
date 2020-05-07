@@ -7,13 +7,14 @@ import (
 )
 
 const (
-	Login_route = "/login"
+	LOGIN_ROUTE = "/login"
+	ErrNotFound = FetchErr("Uživatel s tímto kódem neexistuje")
 )
 
 // PlayerStore stores score information about players
 type PlayerStore interface {
-	GetRecipeScore(name string) int
-	RecordWin(name string)
+	// GetRecipeScore(name string) int
+	// RecordWin(name string)
 	FetchRecipes() error
 	GetRecipes() ([]Recipe, error)
 	AddRecipe(userId, categoryId int, title, desc, link string) error
@@ -35,9 +36,9 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	p.store = store
 
 	router := http.NewServeMux()
-	router.Handle("/recipes", http.HandlerFunc(p.recipesHandler))
+	router.Handle("/recipes/", http.HandlerFunc(p.recipesHandler))
 	router.Handle("/add-recipe", http.HandlerFunc(p.addRecipeHandler))
-	router.Handle(Login_route, http.HandlerFunc(p.loginHandler))
+	router.Handle(LOGIN_ROUTE, http.HandlerFunc(p.loginHandler))
 	// router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 
 	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -50,14 +51,34 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 func (p *PlayerServer) recipesHandler(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("content-type", jsonContentType)
 	// json.NewEncoder(w).Encode(p.store.GetRecipes())
+	myRecipesPrefix := r.URL.Path[len("/recipes/"):]
+	var filteredRecipes = []Recipe{}
+
+	session, err := sessionStore.Get(r, SessionName)
+	if err != nil {
+		fmt.Printf("Get session error: %v", err)
+		//handleServerError(w, err)
+		return
+	}
+	user := getUser(session)
+
 	recipes, err := p.store.GetRecipes()
 	if err != nil {
 		handleServerError(w, err)
 	}
+	if myRecipesPrefix != "" {
+		for _, r := range recipes {
+			if r.Author.Username == user.Username {
+				filteredRecipes = append(filteredRecipes, r)
+			}
+		}
+	} else {
+		filteredRecipes = recipes
+	}
 	tpl.ExecuteTemplate(w, "index.html", struct {
 		Recipes []Recipe
 	}{
-		Recipes: recipes,
+		Recipes: filteredRecipes,
 	})
 }
 
@@ -82,7 +103,7 @@ func (p *PlayerServer) addRecipeHandler(w http.ResponseWriter, r *http.Request) 
 			//handleServerError(w, err)
 			return
 		}
-		//http.Redirect(w, r, Login_route, http.StatusFound)
+		//http.Redirect(w, r, LOGIN_ROUTE, http.StatusFound)
 		return
 	} */
 
@@ -109,26 +130,23 @@ func (p *PlayerServer) addRecipeHandler(w http.ResponseWriter, r *http.Request) 
 func (p *PlayerServer) loginHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := sessionStore.Get(r, SessionName)
 	if err != nil {
-		fmt.Printf("Login error: %v", err)
-		handleServerError(w, err)
+		fmt.Fprintf(w, "Session error: %v", err)
 		return
 	}
 
 	code, _ := strconv.Atoi(r.FormValue("code"))
 
 	user, err := p.store.FetchUserByCode(code)
-	if err != nil {
-		handleServerError(w, err)
-		return
-	}
-
-	if code != user.Code {
+	if err == ErrNotFound {
 		err = session.Save(r, w)
 		if err != nil {
 			handleServerError(w, err)
 			return
 		}
-		fmt.Fprint(w, "Kod není správný :(")
+		fmt.Fprint(w, ErrNotFound)
+		return
+	} else if err != nil {
+		handleServerError(w, err)
 		return
 	}
 
@@ -144,7 +162,7 @@ func (p *PlayerServer) loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/add-recipe", http.StatusFound)
 }
 
-func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
+/* func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
 	player := r.URL.Path[len("/players/"):]
 
 	switch r.Method {
@@ -168,9 +186,9 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
 func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
-}
+} */
 
 func handleServerError(w http.ResponseWriter, err error) {
 	// log.WithField("err", err).Info("Error handling session.")
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	http.Error(w, "Application error", http.StatusInternalServerError)
 }
