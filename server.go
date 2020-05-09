@@ -52,7 +52,7 @@ func (p *PlayerServer) recipesHandler(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("content-type", jsonContentType)
 	// json.NewEncoder(w).Encode(p.store.GetRecipes())
 	myRecipesPrefix := r.URL.Path[len("/recipes/"):]
-	var filteredRecipes = []Recipe{}
+	var filteredRecipes []Recipe
 
 	session, err := sessionStore.Get(r, SessionName)
 	if err != nil {
@@ -117,6 +117,11 @@ func (p *PlayerServer) addRecipeHandler(w http.ResponseWriter, r *http.Request) 
 		if link == "" || title == "" {
 			fmt.Fprint(w, "Zadej nazev, odkaz a kategorii")
 		} else {
+			ok := CheckWebsite(link)
+			if !ok {
+				fmt.Fprint(w, "Zadaný odkaz na recept nelze ověřit. Asi není platný.")
+				return
+			}
 			err := p.store.AddRecipe(user.Id, categoryId, title, desc, link)
 			if err != nil {
 				handleServerError(w, err)
@@ -187,6 +192,20 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
 } */
+
+// CheckWebsite returns true if the URL returns a 200 status code, false otherwise
+func CheckWebsite(url string) bool {
+	response, err := http.Head(url)
+	if err != nil {
+		return false
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return false
+	}
+
+	return true
+}
 
 func handleServerError(w http.ResponseWriter, err error) {
 	// log.WithField("err", err).Info("Error handling session.")

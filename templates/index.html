@@ -2,7 +2,7 @@
 <html class="no-js" lang="">
   <head>
     <meta charset="utf-8" />
-    <title>Archivuj si svůj oblíbený recept - MECantina</title>
+    <title>Archivuj si svůj oblíbený recept - MECantina(R)</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -19,8 +19,10 @@
       <section id="packages">
         <div class="section-heading center">
           <h2 class="section-title">Recepty - odkazy</h2>
-          <a href="/recipes/moje" class="more">Jen moje</a> / 
-          <a href="/add-recipe" class="more">Přidat</a>
+          <div>
+            <a href="/recipes/moje" class="btn-primary show-more">Jen moje</a>
+            <a href="/add-recipe" class="btn-primary show-more">Přidám recepis &rarr;</a>
+          </div>
         </div>
         {{ if .Recipes }}
         <ol class="grid fixed-height">
@@ -34,22 +36,23 @@
               </span>
               <p class="description">{{.Descr}}</p>
               <div class="stats">
-                <strong>{{.Category}}</strong> | {{.Author.Username}}
+                <span class="category">{{.Category}}</span> | {{.Author.Username}}
               </div>
             </span>
           </li>
           {{end}}
         </ol>
         {{else}}
-      </section>
-      <div class="note">
-        <p class="noteHeading">No Recipes here</p>
-        <p class="notefooter">
-          Create new task<button class="floating-action-icon-add">here</button>
-        </p>
+        <div class="card">
+          <div class="card-body">
+          <p>Nepřidal jsi ještě žádný recepis :-(</p>
+          <br />
+          <a href="/add-recipe" class="text-link">Chci to napravit &rarr;</a>
+        </div>
       </div>
       {{end}}
+      </section>
     </div>
-    <script src="js/main.js"></script>
+    <!--<script src="js/main.js"></script>-->
   </body>
 </html>

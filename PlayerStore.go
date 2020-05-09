@@ -57,6 +57,8 @@ func (i *RecipeStore) GetRecipes() ([]Recipe, error) {
 
 // FetchRecipes fetches a collection of Recipes
 func (i *RecipeStore) FetchRecipes() error {
+	i.lock.Lock()
+	defer i.lock.Unlock()
 	i.store = nil
 	rows, err := conn.Query(context.Background(), "SELECT recipe.title, recipe.descr, recipe.link, people.username, category.title FROM recipe INNER JOIN people ON recipe.people_id = people.id INNER JOIN category ON recipe.category_id = category.id")
 	if err != nil {

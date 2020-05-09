@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const SessionName = "share-recipe-cookie"
+const SessionName = "mecantina-cookie"
 
 var (
 	conn         *pgx.Conn

@@ -1,4 +1,13 @@
-/* @import "normalize.css"; */
+
+@font-face {
+  font-family: 'InterDisplay';
+  font-style:  normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("InterDisplay-Bold.woff2?v=3.12") format("woff2"),
+       url("InterDisplay-Bold.woff?v=3.12") format("woff");
+}
+
 body,
 html {
   margin: 0;
@@ -175,6 +184,28 @@ button[type="submit"] {
   white-space: nowrap;
   width: 100%;
 }
+[class*=" btn-"], [class^=btn-] {
+  font-size: 14px;
+  line-height: 20px;
+  line-height: 1.5em!important;
+  padding: .375em .75em;
+  font-weight: 600;
+  transition: all .2s ease-in;
+  border-radius: 3px;
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  text-decoration: none!important;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+[class*=" btn-"][class*=primary], [class^=btn-][class*=primary] {
+  background-color: #6064ad;
+  color: #fff;
+}
+[class*=" btn-"][class*=primary]:hover, [class^=btn-][class*=primary]:hover {
+  background-color: #5357a1;
+}
 input[type="search"] {
   -webkit-appearance: textfield;
   box-sizing: content-box;
@@ -209,7 +240,7 @@ html {
   overflow-y: auto;
 }
 body {
-  background: url('bg2.jpg');
+  background: url('img/bg2.jpg');
   background-attachment: fixed;
   background-size: cover;
   font-size: 16px;
@@ -519,6 +550,12 @@ label {
     height: 14rem;
     width: 25%;
   }
+  [class*=" btn-"], [class^=btn-] {
+    font-size: 14px;
+    line-height: 22px;
+    line-height: 1.5em!important;
+    padding: .375em 1em;
+  }
 }
 @media only screen and (min-width: 90em) {
   .grid > li.module {
@@ -563,6 +600,7 @@ label {
   -ms-hyphens: auto;
   hyphens: auto;
   font-size: 16px;
+  font-weight: 500;
   line-height: 22px;
   display: inline-block;
   margin-bottom: 0.5em;
@@ -741,11 +779,15 @@ label {
   margin: 0 auto !important;
 }
 .section-heading > :not(.section-title) {
-  float: right;
-  margin-left: 0.5em;
+  /* float: right; */
+  margin-left: 0em;
+  margin-top: 0.75em;
 }
 .section-heading > :not(.section-title) + :not(.section-title) {
   margin-left: 0;
+}
+.section-heading .btn-primary + .btn-primary {
+  margin-left: 0.5em;
 }
 @media only screen and (min-width: 40em) {
   .section-heading.center {
@@ -818,6 +860,13 @@ label {
     color: #999;
     position: relative;
     z-index: 0;
+}
+
+.grid>li.module .stats .category {
+  font-family: "InterDisplay";
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 @media only screen and (min-width: 40em) {
@@ -896,7 +945,7 @@ label {
 }
 
 .card {
-  box-shadow: 0 0 1.25rem rgba(108,118,134,.1);
+  box-shadow: 0 0 1.25rem rgba(108,118,134,.5);
   position: relative;
   display: -webkit-box;
   display: -webkit-flex;
@@ -919,4 +968,14 @@ label {
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
   padding: 2rem 1.8rem 1.5rem;
+}
+
+.text-link {
+  display: block;
+  padding-bottom: 1em;
+  color: #6064ad;
+}
+
+.text-link:hover {
+  text-decoration: none;
 }
