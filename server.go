@@ -126,7 +126,7 @@ func (p *PlayerServer) addRecipeHandler(w http.ResponseWriter, r *http.Request) 
 			if err != nil {
 				handleServerError(w, err)
 			}
-			http.Redirect(w, r, "/recipes", http.StatusCreated)
+			http.Redirect(w, r, "/recipes/", http.StatusFound)
 		}
 	case http.MethodGet:
 		tpl.ExecuteTemplate(w, "add-recipe.html", user)
