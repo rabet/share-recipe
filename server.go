@@ -36,6 +36,9 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	p.store = store
 
 	router := http.NewServeMux()
+	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/recipes/", http.StatusFound)
+	}))
 	router.Handle("/recipes/", http.HandlerFunc(p.recipesHandler))
 	router.Handle("/add-recipe", http.HandlerFunc(p.addRecipeHandler))
 	router.Handle(LOGIN_ROUTE, http.HandlerFunc(p.loginHandler))
@@ -66,7 +69,7 @@ func (p *PlayerServer) recipesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handleServerError(w, err)
 	}
-	if myRecipesPrefix != "" {
+	if myRecipesPrefix == "moje" {
 		for _, r := range recipes {
 			if r.Author.Username == user.Username {
 				filteredRecipes = append(filteredRecipes, r)
