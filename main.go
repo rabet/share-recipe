@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	viper.AddConfigPath(".")
+	// viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
