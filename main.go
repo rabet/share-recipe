@@ -4,7 +4,6 @@ package main
 import (
 	"context"
 	"encoding/gob"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -25,10 +24,10 @@ var (
 func init() {
 	// viper.AddConfigPath(".")
 	viper.AutomaticEnv()
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	}
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	// }
 
 	dburl := viper.GetString("DATABASE_URL")
 	dbConn(dburl)
