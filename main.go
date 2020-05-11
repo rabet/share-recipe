@@ -4,9 +4,11 @@ package main
 import (
 	"context"
 	"encoding/gob"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v4"
@@ -22,12 +24,15 @@ var (
 )
 
 func init() {
-	// viper.AddConfigPath(".")
-	viper.AutomaticEnv()
-	// err := viper.ReadInConfig()
-	// if err != nil {
-	// 	panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	// }
+	if port := os.Getenv("PORT"); port == "" {
+		viper.AddConfigPath(".")
+		err := viper.ReadInConfig()
+		if err != nil {
+			panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		}
+	} else {
+		viper.AutomaticEnv()
+	}
 
 	dburl := viper.GetString("DATABASE_URL")
 	dbConn(dburl)
